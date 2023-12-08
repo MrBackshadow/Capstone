@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Search</title>
+
+    <style>
+        #map {
+            height: 500px;
+            width: 200%;
+            position: static;
+            float: right;
+            bottom: -100px;
+            width: 400px;
+            border: 3px solid #000000;
+        }
+
+        #highlightInput {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+   
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDNI7xI_zGhZrxWhDtOiMYZ8p0LjbkvoKU&libraries=places&callback=initMap"></script>
+
+    <div>
+        <label for="hotelInput">Enter Hotel Name:</label>
+        <input type="text" id="hotelInput" placeholder="Enter hotel name">
+        <button onclick="searchHotel()">Search</button>
+    </div>
+
+    <div id="map"></div>
+    <div id="reviews"></div>
+    <div id="photos"></div>
+
+    <div id="highlightInput">
+        <label for="keywordInput">Search Reviews for Keyword:</label>
+        <input type="text" id="keywordInput" placeholder="Enter keyword">
+        <button onclick="searchKeyword()">Search Keyword</button>
+    </div>
+
+    <script>
+        var originalReviews; // Store the original reviews to reset after highlighting
+
+        function initMap() {
+            // Initialize the map as before
+            var map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: -34.397, lng: 150.644 },
+                zoom: 14
+            });
+
+            var infowindow = new google.maps.InfoWindow();
+            var service = new google.maps.places.PlacesService(map);
+
+            // change name for hotel 
+            var hotelName = keywordinput;
+
+            // Search for hotels
+            service.textSearch({
+                query: hotelName,
+                fields: ['name', 'geometry', 'formatted_address', 'place_id']
+            }, function (results, status) {
+                if (status === google.maps.places.PlacesServiceStatus.OK) {
+                    var place = results[0];
+
+                    // Display marker on the map
+                    var marker = new google.maps.Marker({
+                        map: map,
+                        position: place.geometry.location
+                    });
+
+                    // Display information about the hotel
+                    infowindow.setContent('<strong>' + place.name + '</strong><br>' + place.formatted_address);
+                    infowindow.open(map, marker);
+
+                    // Get reviews for the hotel
+                    getReviews(place.place_id);
+
+                    // Get photos for the hotel
+                    getPhotos(place.place_id);
+                }
+            });
+        }
+
+        function searchHotel() {
+            var hotelName = document.getElementById('hotelInput').value;
+
+            if (hotelName.trim() !== "") {
+                var map = new google.maps.Map(document.getElementById('map'), {
+                    center: { lat: -34.397, lng: 150.644 },
+                    zoom: 14
+                });
+
+                var infowindow = new google.maps.InfoWindow();
+                var service = new google.maps.places.PlacesService(map);
+
+                // Search for hotels
+                service.textSearch({
+                    query: hotelName,
+                    fields: ['name', 'geometry', 'formatted_address', 'place_id']
+                }, function (results, status) {
+                    if (status === google.maps.places.PlacesServiceStatus.OK) {
+                        var place = results[0];
+
+                        // Display marker on the map
+                        var marker = new google.maps.Marker({
+                            map: map,
+                            position: place.geometry.location
+                        });
+
+                        // Display information about the hotel
+                        infowindow.setContent('<strong>' + place.name + '</strong><br>' + place.formatted_address);
+                        infowindow.open(map, marker);
+
+                        // Get reviews for the hotel
+                        getReviews(place.place_id);
+
+                        // Get photos for the hotel
+                        getPhotos(place.place_id);
+                    } else {
+                        // Handle no results or error
+                        alert('No results found for ' + hotelName);
+                    }
+                });
+            } else {
+                alert('Please enter a hotel name');
+            }
+        }
+
+        function getReviews(placeId) {
+            var service = new google.maps.places.PlacesService(document.getElementById('reviews'));
+
+            service.getDetails({
+                placeId: placeId,
+                fields: ['name', 'reviews']
+            }, function (place, status) {
+                if (status === google.maps.places.PlacesServiceStatus.OK) {
+                    var reviewsContainer = document.getElementById('reviews');
+                    reviewsContainer.innerHTML = '<h2>Reviews for ' + place.name + '</h2>';
+
+                    // Store original reviews for reset
+                    originalReviews = place.reviews;
+
+                    // Display each review
+                    place.reviews.forEach(function (review, index) {
+                        reviewsContainer.innerHTML += '<p id="review_' + index + '"><strong>' + review.author_name + '</strong>: ' + review.text + '</p>';
+                    });
+                }
+            });
+        }
+
+        function getPhotos(placeId) {
+            var service = new google.maps.places.PlacesService(document.getElementById('photos'));
+
+            service.getDetails({
+                placeId: placeId,
+                fields: ['photos']
+            }, function (place, status) {
+                if (status === google.maps.places.PlacesServiceStatus.OK) {
+                    var photosContainer = document.getElementById('photos');
+                    photosContainer.innerHTML = '<h2>Photos for ' + place.name + '</h2>';
+
+                    // Display each photo
+                    place.photos.forEach(function (photo) {
+                        var photoUrl = photo.getUrl({ maxWidth: 100, maxHeight: 100 });
+                        photosContainer.innerHTML += '<img src="' + photoUrl + '" alt="Hotel Photo">';
+                    });
+                }
+            });
+        }
+
+        function searchKeyword() {
+            var keyword = document.getElementById('keywordInput').value.toLowerCase();
+
+            if (keyword.trim() !== "") {
+                // Reset styles and content to original
+                originalReviews.forEach(function (review, index) {
+                    var reviewElement = document.getElementById('review_' + index);
+                    reviewElement.style.backgroundColor = ''; // Reset background color
+                });
+
+                // Filter and highlight reviews containing the keyword
+                originalReviews.forEach(function (review, index) {
+                    var reviewElement = document.getElementById('review_' + index);
+                    var reviewText = review.text.toLowerCase();
+
+                    if (reviewText.includes(keyword)) {
+                        reviewElement.style.backgroundColor = '#FFFF99'; // Highlight background color
+                    }
+                });
+            } else {
+                alert('Please enter a keyword');
+            }
+        }
+
+        // Call the initMap function when the Google Maps API script has loaded
+        google.maps.event.addDomListener(window, 'load', initMap);
+    </script>
+</body>
+</html>

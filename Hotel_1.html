@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nyc West Club</title>
+    <link rel="stylesheet" href="Cap1.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <style> 
+        #map{
+        height: 500px;
+        width: 200%;
+        position: static;
+        float: right;
+        bottom: -100px;
+        width: 400px;
+        border: 3px solid #000000;
+        
+       
+        }
+
+    
+    
+
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <a href="#">Hotels on the Go!</a>
+        <nav class="navbar">
+            <a href="CapTest1.html">home</a>
+            <a href="About.html">about</a>
+            <a href="Reviews.html">reviews</a>
+        </nav>
+
+        <div class="icons">
+
+            <div i class="fa fa-bars" id="menu-bars"></div>
+            <div i class="fa fa-search" id="search-bar"></div>
+        </div>
+
+        <div class="search-box">
+            <input type="search" placeholder="search citites here">
+        </div>
+
+    </header>
+    <div class = "main-background">
+        <div class ="main-text">
+            <h1>New York city West Club</h1>
+            <h2>Reviews</h2>
+        </div>
+   
+    
+
+    <script src="Hotel_1.js"></script>
+
+
+
+<div id="map"></div>
+
+    <script >
+    function initMap(){
+        // map opation
+        var options = {
+
+            zoom:16,
+            center:{lat:40.7596587,lng:-73.97732049999999}
+        }
+        //new map
+        var map = new 
+        google.maps.Map(document.getElementById('map') , options)
+
+        //Add marker
+        var marker = new google.maps.Marker({
+            position:{lat:40.759658, lng:-73.97732049999999}, 
+            map:map
+        })
+    }
+</script>
+   <script
+    async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBMjEMFEDRr-oFiOZLjdwdd3SKFjXl-tJ4&callback=initMap">
+    </script>
+
+<script src="Hotel_1.js"></script>
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style> 
+        #map{
+        height: 500px;
+        width: 200%;
+        position: static;
+        float: right;
+        bottom: -100px;
+        width: 400px;
+        border: 3px solid #000000;
+        }
+
+    
+    
+
+    </style>
+</head>
+<body>
+
+
+    <header class="header">
+        <a href="#">Hotels on the Go!</a>
+        <nav class="navbar">
+            <a href="CapTest1.html">home</a>
+            <a href="About.html">about</a>
+            <a href="Reviews.html">reviews</a>
+        </nav>
+
+        <div class="icons">
+
+            <div i class="fa fa-bars" id="menu-bars"></div>
+            <div i class="fa fa-search" id="search-bar"></div>
+        </div>
+
+        <div class="search-box">
+            <input type="search" placeholder="search citites here">
+        </div>
+
+    </header>
+
+   
+    
+
+    <script src="Hotel_1.js"></script>
+   
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDNI7xI_zGhZrxWhDtOiMYZ8p0LjbkvoKU&libraries=places&callback=initMap"></script>
+
+    <div id="map"></div>
+    <div id="reviews"></div>
+    <div id="photos"></div>
+
+    <script>
+        function initMap() {
+            var map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 40.7499515, lng: -73.97975910000001 },
+                zoom: 14
+            });
+
+            var infowindow = new google.maps.InfoWindow();
+            var service = new google.maps.places.PlacesService(map);
+
+            // change name for hotel I want 
+            var hotelName = '70 Park Avenue Hotel';
+
+            // Search for hotels
+            service.textSearch({
+                query: hotelName,
+                fields: ['name', 'geometry', 'formatted_address', 'place_id']
+            }, function (results, status) {
+                if (status === google.maps.places.PlacesServiceStatus.OK) {
+                    var place = results[0];
+
+                    // Display marker on the map
+                    var marker = new google.maps.Marker({
+                        map: map,
+                        position: place.geometry.location
+                    });
+
+                    // Display information about the hotel
+                    infowindow.setContent('<strong>' + place.name + '</strong><br>' + place.formatted_address);
+                    infowindow.open(map, marker);
+
+                    // Get reviews for the hotel
+                    getReviews(place.place_id);
+
+                    // Get photos for the hotel
+                    getPhotos(place.place_id);
+                }
+            });
+        }
+
+        function getReviews(placeId) {
+            var service = new google.maps.places.PlacesService(document.getElementById('reviews'));
+
+            service.getDetails({
+                placeId: placeId,
+                fields: ['name', 'reviews']
+            }, function (place, status) {
+                if (status === google.maps.places.PlacesServiceStatus.OK) {
+                    var reviewsContainer = document.getElementById('reviews');
+                    reviewsContainer.innerHTML = '<h2>Reviews for ' + place.name + '</h2>';
+
+                    // Display each review
+                    place.reviews.forEach(function (review) {
+                        reviewsContainer.innerHTML += '<p><strong>'+ review.author_name + '</strong>: ' + review.text + '</p>';
+                    });
+                }
+            });
+        }
+
+        function getPhotos(placeId) {
+            var service = new google.maps.places.PlacesService(document.getElementById('photos'));
+
+            service.getDetails({
+                placeId: placeId,
+                fields: ['photos']
+            }, function (place, status) {
+                if (status === google.maps.places.PlacesServiceStatus.OK) {
+                    var photosContainer = document.getElementById('photos');
+                    photosContainer.innerHTML = '<h2>Photos for ' + place.name + '</h2>';
+
+                    // Display each photo
+                    place.photos.forEach(function (photo) {
+                        var photoUrl = photo.getUrl({ maxWidth: 100, maxHeight: 100 });
+                        photosContainer.innerHTML += '<img src="' + photoUrl + '" alt="Hotel Photo">';
+                    });
+                }
+            });
+        }
+
+     
+       
+    </script>
+</body>
+</html>
